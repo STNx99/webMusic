@@ -1,39 +1,64 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FaPlay, FaPause, FaStepForward, FaStepBackward } from 'react-icons/fa';
 
-export default function MiniPlayer({ song, onClose }) {
+export default function MiniPlayer({ song, onClose, onNext, onPrev }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const duration = 180;
+  const audioRef = useRef(null);
 
   useEffect(() => {
-    let interval = null;
-
-    if (isPlaying) {
-      interval = setInterval(() => {
-        setCurrentTime((prev) => (prev < duration ? prev + 1 : duration));
-      }, 1000);
-    } else {
-      clearInterval(interval);
+    if (song) {
+      setCurrentTime(0);
+      setIsPlaying(true);
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play();
+      }
     }
+  }, [song]);
 
-    return () => clearInterval(interval);
+  useEffect(() => {
+    if (audioRef.current) {
+      isPlaying ? audioRef.current.play() : audioRef.current.pause();
+    }
   }, [isPlaying]);
 
-  const formatTime = (sec) => {
-    const min = Math.floor(sec / 60);
-    const second = String(sec % 60);
-    return `${min}:${second}`;
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
   };
 
   const handleSeek = (e) => {
-    setCurrentTime(Number(e.target.value));
+    const time = Number(e.target.value);
+    setCurrentTime(time);
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+    }
+  };
+
+  const handleEnded = () => {
+    setIsPlaying(false);
+    if (onNext) onNext(); // Tự động chuyển bài nếu có
+  };
+
+  const formatTime = (sec) => {
+    const min = Math.floor(sec / 60);
+    const s = String(Math.floor(sec % 60)).padStart(2, '0');
+    return `${min}:${s}`;
   };
 
   if (!song) return null;
 
   return (
     <div className="fixed bottom-4 left-4 right-4 md:left-20 md:right-20 bg-gray-800 rounded-2xl shadow-lg px-4 py-3 z-50 backdrop-blur-md border border-gray-700">
+      <audio
+        ref={audioRef}
+        src={song.audioUrl}
+        onTimeUpdate={handleTimeUpdate}
+        onEnded={handleEnded}
+      />
+
       {/* Top row: info + controls */}
       <div className="flex items-center justify-between">
         {/* Song info */}
@@ -47,7 +72,11 @@ export default function MiniPlayer({ song, onClose }) {
 
         {/* Controls */}
         <div className="flex items-center gap-4">
-          <button className="text-gray-400 hover:text-white text-lg">
+          <button
+            className="text-gray-400 hover:text-white text-lg"
+            onClick={onPrev}
+            disabled={!onPrev}
+          >
             <FaStepBackward />
           </button>
           <button
@@ -56,13 +85,20 @@ export default function MiniPlayer({ song, onClose }) {
           >
             {isPlaying ? <FaPause /> : <FaPlay />}
           </button>
-          <button className="text-gray-400 hover:text-white text-lg">
+          <button
+            className="text-gray-400 hover:text-white text-lg"
+            onClick={onNext}
+            disabled={!onNext}
+          >
             <FaStepForward />
           </button>
         </div>
 
         {/* Close button */}
-        <button onClick={onClose} className="ml-4 text-gray-400 hover:text-red-400 text-xl font-bold">
+        <button
+          onClick={onClose}
+          className="ml-4 text-gray-400 hover:text-red-400 text-xl font-bold"
+        >
           ×
         </button>
       </div>
@@ -72,14 +108,14 @@ export default function MiniPlayer({ song, onClose }) {
         <input
           type="range"
           min="0"
-          max={duration}
+          max={song.duration || 180}
           value={currentTime}
           onChange={handleSeek}
           className="w-full accent-green-500"
         />
         <div className="flex justify-between text-xs text-gray-400 mt-1">
           <span>{formatTime(currentTime)}</span>
-          <span>{formatTime(duration)}</span>
+          <span>{formatTime(song.duration || 180)}</span>
         </div>
       </div>
     </div>

@@ -1,12 +1,16 @@
 import { Routes, Route } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Player from './pages/Player';
 import Library from './pages/Library';
 import About from './pages/About';
+
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
-import { useState, useEffect } from 'react';
+
+import { AuthProvider } from './contexts/AuthContext';
 
 export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(() =>
@@ -24,22 +28,27 @@ export default function App() {
   }, [isDarkMode]);
 
   return (
-    <div className="flex dark:bg-gray-900 min-h-screen">
-      <Sidebar isDarkMode={isDarkMode} toggleDarkMode={() => setIsDarkMode(!isDarkMode)} />
+    <AuthProvider>
+      <div className="flex dark:bg-gray-900 min-h-screen text-white">
+        <Sidebar
+          isDarkMode={isDarkMode}
+          toggleDarkMode={() => setIsDarkMode(!isDarkMode)}
+        />
 
-      <div className="flex-1">
-        <Navbar />
+        <div className="flex-1">
+          <Navbar />
 
-        <main className="p-4">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/player" element={<Player />} />
-            <Route path="/library" element={<Library />} />
-            <Route path="/about" element={<About />} />
-          </Routes>
-        </main>
+          <main className="p-4">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/player" element={<Player />} />
+              <Route path="/library" element={<Library />} />
+              <Route path="/about" element={<About />} />
+            </Routes>
+          </main>
+        </div>
       </div>
-    </div>
+    </AuthProvider>
   );
 }

@@ -4,7 +4,7 @@ import { FaPlay, FaPause, FaStepForward, FaStepBackward } from 'react-icons/fa';
 export default function PlayerFooter({ song }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const duration = 180; // 3 phút giả lập
+  const duration = 180;
 
   useEffect(() => {
     let timer = null;
@@ -21,7 +21,7 @@ export default function PlayerFooter({ song }) {
 
   const formatTime = (sec) => {
     const min = Math.floor(sec / 60);
-    const second = String(sec % 60).padStart(2, '0');
+    const second = String(sec % 60).padStart(1, '0');
     return `${min}:${second}`;
   };
 

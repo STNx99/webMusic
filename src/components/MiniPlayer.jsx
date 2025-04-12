@@ -21,9 +21,9 @@ export default function MiniPlayer({ song, onClose }) {
   }, [isPlaying]);
 
   const formatTime = (sec) => {
-    const minutes = Math.floor(sec / 60);
-    const seconds = String(sec % 60).padStart(2, '0');
-    return `${minutes}:${seconds}`;
+    const min = Math.floor(sec / 60);
+    const second = String(sec % 60);
+    return `${min}:${second}`;
   };
 
   const handleSeek = (e) => {
